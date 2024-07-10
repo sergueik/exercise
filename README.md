@@ -36,7 +36,7 @@ The early development versions of the exercise supported `GET` requests on `/enc
 however formatting a real `url` argument as a path variable or a query string would require encoding the special characters and is inconvenient for a user.
 These end points now advise to use `POST`:
 
-![advise](https://github.com/sergueik/puppetmaster_vagrant/blob/master/exercise/screenshots/capture-advise.png)
+![advise](https://github.com/sergueik/exercise/blob/master/screenshots/capture-advise.png)
 
 ### Usage
 
@@ -69,7 +69,7 @@ it will respond with
 ```
 or equivalent Postman command
 
-![encode](https://github.com/sergueik/puppetmaster_vagrant/blob/master/exercise/screenshots/capture-encode.png)
+![encode](https://github.com/sergueik/exercise/blob/master/screenshots/capture-encode.png)
 
 
 
@@ -89,14 +89,14 @@ this will respond with
 ```
 Alternatively do it in Postman
 
-![decode](https://github.com/sergueik/puppetmaster_vagrant/blob/master/exercise/screenshots/capture-decode.png)
+![decode](https://github.com/sergueik/exercise/blob/master/screenshots/capture-decode.png)
 
 #### Error Processing
 
 When decode an unknown short URL is attempted, the response code will be 404 status not found.
 when there is a problem with parsing the payload JSON or the URL in the JSON, server will also respond with the 501 status non implemented
 
-![error](https://github.com/sergueik/puppetmaster_vagrant/blob/master/exercise/screenshots/capture-nodata.png)
+![error](https://github.com/sergueik/exercise/blob/master/screenshots/capture-nodata.png)
 
 ### Notes
 
