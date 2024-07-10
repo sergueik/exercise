@@ -1,14 +1,32 @@
-### info
-Two endpoints are required
-`/encode` - Encodes a URL to a shortened URL
-`/decode` - Decodes a shortened URL to its original URL.
-Both endpoints should return JSON
-o
+## info
+
+### Objective
+Two endpoints are required:
+* `/encode` - Encodes a URL to a shortened URL
+* `/decode` - Decodes a shortened URL to its original URL.
+
+Both endpoints should produce JSON with the short URL
 
 ### Example
-`https://example.com/library/react` to be comverted into something like
+
+`https://example.com/library/react` to be converted into something like
 `http://short.est/GeAi9K`
 and vise versa
+
+### Details and Work In Progress
+
+* Currently both `GET` and `POST` methods are supported. In later versions the `GET` method will be removed, 
+since it requires URL escaping of the `url` path variable argument, which is inconvenient.
+
+* Currently the URL argument is not parsed into protocol, host and path but converted fully.
+
+* To produce the short URL, the following methods  are applied:
+
+ + `MessageDigest.getInstance("SHA-256").update()`
+ + `Base64.encodeBase64`
+ + `String.substring(1,8)` 
+
+
 ### Usage
 * compile
 ```sh
@@ -59,7 +77,7 @@ curl -s -X POST -d '{"url": "xxxx"}' http://localhost:8085/basic/encode
 ```json
 {"timestamp":"2024-07-09T21:41:10.460+00:00","status":415,"error":"Unsupported Media Type","message":"","path":"/basic/encode"}
 ```
-* provide header - still not working
+* provide header - detects invalid JSON:
 ```
 curl -s -v -X POST -H 'Content-Type: application/json' -d '{ "x": 123, "y": 456}' http://localhost:8085/basic/encode
 ```
@@ -82,7 +100,7 @@ curl -s -v -X POST -H 'Content-Type: application/json' -d '{ "x": 123, "y": 456}
 
 server log show blank payload:
 ```txt
-2024-07-09 17:46:05.906  INFO 3016 --- [nio-8085-exec-1] example.controller.ExampleController     : processing {}
+2024-07-09 17:46:05.906  INFO 3016 --- [nio-8085-exec-1] example.controller.ExampleController     : processing {"x": 123, "y": 456}
 2024-07-09 17:46:05.908  INFO 3016 --- [nio-8085-exec-1] example.controller.ExampleController     : processing null
 ```
 
@@ -103,3 +121,35 @@ mvn test
 
 No actual redirect is needed, just a endpoint 
 
+
+### Tasks
+
+* Implement assignment using
+  +  Language: Java
+  + Framework: Spring
+* Two endpoints are required
+`/encode` - Encodes a URL to a shortened URL
+`/decode` - Decodes a shortened URL to its original URL.
+
+Both endpoints should return JSON
+
+There is no restriction on how your encode/decode algorithm should work. You just need to make sure that a URL can be encoded to a short URL and the short URL can be decoded to the original URL. You do not need to persist short URLs to a database. Keep them in memory.
+
+
+
+Provide detailed instructions on how to run your assignment in a separate markdown file
+
+Provide API tests for both endpoints
+
+ 
+
+
+### Evaluation Criteria
+
+* Java best practices
+*  API implemented featuring a /encode and /decode endpoint
+
+* Show us your work through your commit history
+* Completeness: did you complete the features? Are all the tests running?
+* Correctness: does the functionality act in sensible, thought-out ways?
+* Maintainability: is it written in a clean, maintainable way?

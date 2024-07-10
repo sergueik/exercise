@@ -18,7 +18,7 @@ import org.springframework.web.bind.annotation.RestController;
 import example.service.ExampleService;
 
 @RestController
-@RequestMapping("/basic")
+@RequestMapping("/")
 public class ExampleController {
 
 	private static final Logger logger = LoggerFactory.getLogger(ExampleController.class);
@@ -63,15 +63,16 @@ public class ExampleController {
 	@RequestMapping(method = RequestMethod.POST, value = "/encode", consumes = {
 			MediaType.APPLICATION_JSON_VALUE }, produces = { MediaType.APPLICATION_JSON_VALUE })
 	public ResponseEntity<Map<String, String>> encode(@RequestBody Map<String, String> payload) {
-		logger.info(String.format("processing %s", payload));
+		logger.debug("processing {}", payload);
 		String url = payload.get("url");
-		logger.info("processing {}", url);
 		if (url == null) {
+			logger.error("invalid payload {}", payload);
 			return ResponseEntity.status(HttpStatus.NOT_IMPLEMENTED).body(null);
 		} else {
 			Map<String, String> result = new HashMap<>();
 			String encoded = service.encode(url);
 			result.put("result", encoded);
+			logger.debug("returning {}", result);
 			return ResponseEntity.status(HttpStatus.OK).body(result);
 		}
 	}

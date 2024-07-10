@@ -37,7 +37,6 @@ public class AcceptancePostTest {
 	@LocalServerPort
 	private int randomServerPort = 8085;
 	private static final Gson gson = new Gson();
-	private final String route = "/basic";
 	// NOTE: exercising property file override
 	private static String body = "{\"result\":\"JD+mPIWm\"}";
 	private static final RestTemplate restTemplate = new RestTemplate();
@@ -49,21 +48,22 @@ public class AcceptancePostTest {
 	public void setUp() {
 		headers = new HttpHeaders();
 		headers.setContentType(MediaType.APPLICATION_JSON);
+		// TODO:
 		// headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
 
 	}
 
 	@Test
 	public void test1() {
-		String value = "xxxx";
+		String key = "xxxx";
 		data.clear();
-		data.put("url", value);
+		data.put("url", key);
 		// NOTE: REST end points trailing slashes Java 17
-		url = "http://localhost:" + randomServerPort + route + "/encode";
+		url = "http://localhost:" + randomServerPort + "/encode";
 
 		final HttpEntity<String> request = new HttpEntity<String>(gson.toJson(data), headers);
 
-		// NOTE:
+		// NOTE: failure to serialize the payload will manifest in runtime
 		// request = new HttpEntity<String>(data.toString(), headers);
 
 		// ReadableException: JSON parse error:
@@ -77,23 +77,20 @@ public class AcceptancePostTest {
 
 	@Test
 	public void test2() {
-		String value = "xxxx";
+		final String key = "xxxx";
+		final String value = "JD+mPIWm";
 		data.clear();
-		data.put("url", value);
+		data.put("url", key);
+
 		// NOTE: REST end points trailing slashes Java 17
-		url = "http://localhost:" + randomServerPort + route + "/encode";
+		url = "http://localhost:" + randomServerPort + "/encode";
+		@SuppressWarnings("rawtypes")
 		final HttpEntity<Map> request = new HttpEntity<Map>(data, headers);
-
-		// NOTE:
-		// request = new HttpEntity<String>(data.toString(), headers);
-
-		// ReadableException: JSON parse error:
-		// Unexpected character ('u' (code 117)):
-		// was expecting double-quote to start field name
-
 		final ResponseEntity<Map> responseEntity = restTemplate.postForEntity(url, request, Map.class, headers);
 		assertThat(responseEntity.getStatusCode(), is(HttpStatus.OK));
-		assertThat(responseEntity.getBody().containsKey("result"), is(true));
+		final Map responseData = responseEntity.getBody();
+		assertThat(responseData.containsKey("result"), is(true));
+		assertThat(responseData.get("result"), is(value));
 	}
 
 }
