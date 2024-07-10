@@ -61,7 +61,7 @@ curl -s -X POST -d '{"url": "xxxx"}' http://localhost:8085/basic/encode
 ```
 * provide header - still not working
 ```
-curl -s -v -X POST -H 'Content-Type: application/json' -d '{"url": "xxxx", "x": 123, "y": 456}' http://localhost:8085/basic/encode
+curl -s -v -X POST -H 'Content-Type: application/json' -d '{ "x": 123, "y": 456}' http://localhost:8085/basic/encode
 ```
 ```text
  POST /basic/encode HTTP/1.1
@@ -69,7 +69,7 @@ curl -s -v -X POST -H 'Content-Type: application/json' -d '{"url": "xxxx", "x": 
 > User-Agent: curl/7.75.0
 > Accept: */*
 > Content-Type: application/json
-> Content-Length: 35
+> Content-Length: 15
 >
 } [35 bytes data]
 * Mark bundle as not supporting multiuse
@@ -82,10 +82,18 @@ curl -s -v -X POST -H 'Content-Type: application/json' -d '{"url": "xxxx", "x": 
 
 server log show blank payload:
 ```txt
-2024-07-09 17:46:05.906  INFO 3016 --- [nio-8085-exec-1] example.controller.Exam
-pleController     : processing {}
-2024-07-09 17:46:05.908  INFO 3016 --- [nio-8085-exec-1] example.controller.Exam
-pleController     : processing null
+2024-07-09 17:46:05.906  INFO 3016 --- [nio-8085-exec-1] example.controller.ExampleController     : processing {}
+2024-07-09 17:46:05.908  INFO 3016 --- [nio-8085-exec-1] example.controller.ExampleController     : processing null
+```
+
+```sh
+curl  -s -X POST -H 'Content-Type: application/json' -d '{"url": "xxxx", "x": 123, "y": 456}' http://localhost:8085/basic/encode |jq
+```
+```JSON
+{
+  "result": "JD+mPIWm"
+}
+
 ```
 * test - uses `RestTemplate`
 ```sh

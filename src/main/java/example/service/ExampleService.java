@@ -54,7 +54,7 @@ public class ExampleService {
 			} while (shortUrlCache.containsKey(value));
 			fullUrlCache.put(name, value);
 			shortUrlCache.put(value, name);
-			logger.info("saving cache for {}, {}", name, value);
+			logger.info("saving caches for {}, {}", name, value);
 		}
 		return value;
 	}
