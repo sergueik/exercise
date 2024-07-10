@@ -1,16 +1,12 @@
 package example.service;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.apache.commons.codec.EncoderException;
-import org.apache.commons.codec.binary.Base64;
-import org.springframework.beans.factory.annotation.Autowired;
 import java.security.MessageDigest;
 import java.util.HashMap;
 import java.util.Map;
 
-// https://docs.oracle.com/javase/8/docs/api/java/security/MessageDigest.html
-import org.springframework.stereotype.Component;
+import org.apache.commons.codec.binary.Base64;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -47,7 +43,8 @@ public class ExampleService {
 			String hash = new String(messageDigest.digest());
 
 			do {
-				// NOTE: the "JD+mPIWm" is not a valid URL. Need to URL ecnode
+				// NOTE: the "JD+mPIWm" is likely *not* a valid URL. Need to URL
+				// ecnode
 				// https://commons.apache.org/proper/commons-codec/apidocs/org/apache/commons/codec/binary/Base64.html
 				value = new String(base64.encodeBase64(hash.getBytes())).substring(0, 8);
 			} while (cache.containsKey(value));
@@ -63,6 +60,7 @@ public class ExampleService {
 		if (cache.containsKey(value)) {
 			name = cache.get(value);
 		} else {
+			logger.info("{} not found in cache", value);
 			// error to be processed by controller
 		}
 		return name;

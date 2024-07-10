@@ -53,7 +53,6 @@ public class ExampleController {
 
 	private static final Logger logger = LoggerFactory.getLogger(ExampleController.class);
 
-
 	private static Gson gson = new GsonBuilder().create();
 	private boolean debug = false;
 	// see also about writing SpringBoot application tests without relying on
@@ -80,12 +79,17 @@ public class ExampleController {
 
 	@RequestMapping(method = RequestMethod.GET, value = "/decode/{url}", produces = {
 			MediaType.APPLICATION_JSON_VALUE })
-	public ResponseEntity<Map<String, String>> decode(@PathVariable("url") String url) {
+	public ResponseEntity<?> decode(@PathVariable("url") String url) {
 		Map<String, String> result = new HashMap<>();
 		String decoded = service.decode(url);
-		result.put("result", decoded);
-		return ResponseEntity.status(HttpStatus.OK).body(result);
+		logger.info("Processing \"{}\"", decoded);
+		if (decoded == null) {
 
+			return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+		} else {
+			result.put("result", decoded);
+			return ResponseEntity.status(HttpStatus.OK).body(result);
+		}
 	}
 
 	public ExampleController() {
