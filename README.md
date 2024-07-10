@@ -13,12 +13,65 @@ Both endpoints should produce JSON with the short URL
 `http://short.est/GeAi9K`
 and vise versa
 
-### Details and Work In Progress
 
-* Currently both `GET` and `POST` methods are supported. In later versions the `GET` method will be removed, 
-since it requires URL escaping of the `url` path variable argument, which is inconvenient.
+### Usage
 
-* Currently the URL argument is not parsed into protocol, host and path but converted fully.
+* compile
+```sh
+mvn compile
+```
+* test - uses `RestTemplate`
+```sh
+mvn test
+```
+* run skipping test
+```sh
+mvn -Dmaven.test.skip=true spring-boot:run
+```
+To convert an URL, construct the POST  request in Postman or curl 
+```sh
+curl -s -X POST -H 'Content-Type: application/json' -d '{ "url": "https://www.google.com/"}' http://localhost:8085/encode
+```
+it will respond with
+```JSON
+{
+  "result":"http://short/0OGWoMJd"
+}
+```
+
+To reconstruct the long url use the 
+
+```sh
+curl -s -X POST -H 'Content-Type: application/json' -d '{ "url": "http://short/0OGWoMJd"}' http://localhost:8085/decode
+```
+
+this will respond with
+```JSON
+{
+  "result": "https://www.google.com/"
+}
+```
+Alternatively do it in Postman
+
+![encode](https://github.com/sergueik/puppetmaster_vagrant/blob/master/exercise/screenshots/capture-encode.png)
+
+![decode](https://github.com/sergueik/puppetmaster_vagrant/blob/master/exercise/screenshots/capture-decode.png)
+
+The host name `http://short` is configurable via `application.properties`:
+```java
+example.host = http://short
+```
+
+When an unknown short URL is attempted, the server will respond with a 404 status not found.
+when there is a problem with parsing the payload JSON or the URL in the JSON, server will also respond with the 501 status non implemented
+
+![error](https://github.com/sergueik/puppetmaster_vagrant/blob/master/exercise/screenshots/capture-nodata.png)
+### Notes
+
+* The early development versions of the exercise supported `GET` requests on `/encode` and `/decode` with the `url` in the path variable, however formatting an `url` argument as a path variable or a query string would require encoding the special characters and is inconvenient for a user.
+These end points now advise to use `POST`.
+
+* No actual redirect is implemented, just API endpoints to convert a long string to a short string and vise versa.
 
 * To produce the short URL, the following methods  are applied:
 
@@ -26,130 +79,6 @@ since it requires URL escaping of the `url` path variable argument, which is inc
  + `Base64.encodeBase64`
  + `String.substring(1,8)` 
 
-
-### Usage
-* compile
-```sh
-mvn compile
-```
-* run skipping test
-```sh
-mvn -Dmaven.test.skip=true spring-boot:run
-```
-```sh
-curl -sX GET http://localhost:8085/basic/encode/xxxx | jq
-```
-```json
-{
-  "result": "JD+mPIWm"
-}
-
-```
-```sh
-curl -s -vX GET http://localhost:8085/basic/encode/xxxx
-```
-```text
-* Connected to localhost (::1) port 8085 (#0)
-> GET /basic/encode/xxxx HTTP/1.1
-> Host: localhost:8085
-> User-Agent: curl/7.75.0
-> Accept: */*
->
-* Mark bundle as not supporting multiuse
-< HTTP/1.1 200
-< Content-Type: application/json
-< Transfer-Encoding: chunked
-< Date: Tue, 09 Jul 2024 20:16:16 GMT
-<
-{ [27 bytes data]
-* Connection #0 to host localhost left intact
-```
-```sh
-curl -sX GET http://localhost:8085/basic/decode/JD+mPIWm
-```
-```text
-{"result":"xxxx"}
-```
-
-```sh
-curl -s -X POST -d '{"url": "xxxx"}' http://localhost:8085/basic/encode
-```
-```json
-{"timestamp":"2024-07-09T21:41:10.460+00:00","status":415,"error":"Unsupported Media Type","message":"","path":"/basic/encode"}
-```
-* provide header - detects invalid JSON:
-```
-curl -s -v -X POST -H 'Content-Type: application/json' -d '{ "x": 123, "y": 456}' http://localhost:8085/basic/encode
-```
-```text
- POST /basic/encode HTTP/1.1
-> Host: localhost:8085
-> User-Agent: curl/7.75.0
-> Accept: */*
-> Content-Type: application/json
-> Content-Length: 15
->
-} [35 bytes data]
-* Mark bundle as not supporting multiuse
-< HTTP/1.1 501
-< Content-Length: 0
-< Date: Tue, 09 Jul 2024 21:47:10 GMT
-< Connection: close
-
-```
-
-server log show blank payload:
-```txt
-2024-07-09 17:46:05.906  INFO 3016 --- [nio-8085-exec-1] example.controller.ExampleController     : processing {"x": 123, "y": 456}
-2024-07-09 17:46:05.908  INFO 3016 --- [nio-8085-exec-1] example.controller.ExampleController     : processing null
-```
-
-```sh
-curl  -s -X POST -H 'Content-Type: application/json' -d '{"url": "xxxx", "x": 123, "y": 456}' http://localhost:8085/basic/encode |jq
-```
-```JSON
-{
-  "result": "JD+mPIWm"
-}
-
-```
-* test - uses `RestTemplate`
-```sh
-mvn test
-```
-### Note
-
-No actual redirect is needed, just a endpoint 
+With this approach the same long url will always be encoded in the same short url. Adding optional random suffix is a work in progress
 
 
-### Tasks
-
-* Implement assignment using
-  +  Language: Java
-  + Framework: Spring
-* Two endpoints are required
-`/encode` - Encodes a URL to a shortened URL
-`/decode` - Decodes a shortened URL to its original URL.
-
-Both endpoints should return JSON
-
-There is no restriction on how your encode/decode algorithm should work. You just need to make sure that a URL can be encoded to a short URL and the short URL can be decoded to the original URL. You do not need to persist short URLs to a database. Keep them in memory.
-
-
-
-Provide detailed instructions on how to run your assignment in a separate markdown file
-
-Provide API tests for both endpoints
-
- 
-
-
-### Evaluation Criteria
-
-* Java best practices
-*  API implemented featuring a /encode and /decode endpoint
-
-* Show us your work through your commit history
-* Completeness: did you complete the features? Are all the tests running?
-* Correctness: does the functionality act in sensible, thought-out ways?
-* Maintainability: is it written in a clean, maintainable way?

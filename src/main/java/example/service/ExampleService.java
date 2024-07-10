@@ -17,7 +17,6 @@ public class ExampleService {
 
 	private static final Logger logger = LoggerFactory.getLogger(ExampleService.class);
 
-	// private static final Map<String,String> cache;
 	private final Map<String, String> fullUrlCache = new HashMap<>();
 	private final Map<String, String> shortUrlCache = new HashMap<>();
 	private MessageDigest messageDigest;
@@ -31,7 +30,7 @@ public class ExampleService {
 		try {
 			messageDigest = MessageDigest.getInstance("SHA-256");
 		} catch (Exception e) {
-			// swallo
+			// swallow
 		}
 
 	}
@@ -47,9 +46,10 @@ public class ExampleService {
 			String hash = new String(messageDigest.digest());
 
 			do {
-				// NOTE: the "JD+mPIWm" is likely *not* a valid URL. Need to URL
+				// NOTE: some short urls e.g. the "JD+mPIWm" is likely *not* a valid URL. Need to URL
 				// how to encode ?
 				// https://commons.apache.org/proper/commons-codec/apidocs/org/apache/commons/codec/binary/Base64.html
+				// https://en.wikipedia.org/wiki/Base62
 				value = new String(base64.encodeBase64(hash.getBytes())).substring(0, 8);
 			} while (shortUrlCache.containsKey(value));
 			fullUrlCache.put(name, value);

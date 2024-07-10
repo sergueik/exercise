@@ -16,6 +16,7 @@ import org.junit.jupiter.api.BeforeEach;
 // import org.junit.jupiter.api.BeforeAll;
 // import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.web.server.LocalServerPort;
 import org.springframework.context.annotation.PropertySource;
@@ -34,13 +35,19 @@ import com.google.gson.Gson;
 
 public class AcceptancePostTest {
 
+	@Value("${example.host}")
+	private String shorthost;
+
 	@LocalServerPort
 	private int randomServerPort = 8085;
-	private static final Gson gson = new Gson();
+	private final Gson gson = new Gson();
 	// NOTE: exercising property file override
-	private static String body = "{\"result\":\"JD+mPIWm\"}";
-	private static final RestTemplate restTemplate = new RestTemplate();
+	// NOTE: will not resolve shorthost when initialized here
+	// private String body = String.format("{\"result\":\"%s/JD+mPIWm\"}",
+	// shorthost);
+	private final RestTemplate restTemplate = new RestTemplate();
 	private String url = null;
+	private String json = null;
 	private final Map<String, String> data = new HashMap<>();
 	private HttpHeaders headers = new HttpHeaders();
 
@@ -48,13 +55,10 @@ public class AcceptancePostTest {
 	public void setUp() {
 		headers = new HttpHeaders();
 		headers.setContentType(MediaType.APPLICATION_JSON);
-		// TODO:
-		// headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
-
 	}
 
 	@Test
-	public void test1() {
+	public void encodeTest() {
 		String key = "xxxx";
 		data.clear();
 		data.put("url", key);
@@ -72,13 +76,14 @@ public class AcceptancePostTest {
 
 		final ResponseEntity<String> responseEntity = restTemplate.postForEntity(url, request, String.class, headers);
 		assertThat(responseEntity.getStatusCode(), is(HttpStatus.OK));
+		final String body = String.format("{\"result\":\"%s/JD+mPIWm\"}", shorthost);
 		assertThat(responseEntity.getBody(), containsString(body));
 	}
 
 	@Test
-	public void test2() {
+	public void decodeTest() {
 		final String key = "xxxx";
-		final String value = "JD+mPIWm";
+		final String value = shorthost + "/" + "JD+mPIWm";
 		data.clear();
 		data.put("url", key);
 
@@ -91,6 +96,39 @@ public class AcceptancePostTest {
 		final Map responseData = responseEntity.getBody();
 		assertThat(responseData.containsKey("result"), is(true));
 		assertThat(responseData.get("result"), is(value));
+	}
+
+	@Test
+	public void missingDataJSONTest() {
+		url = "http://localhost:" + randomServerPort + "/decode";
+		json = "{\"dummy\": \"value\"}";
+		Exception exception = assertThrows(RestClientException.class, () -> {
+			final HttpEntity<String> request = new HttpEntity<String>(json, headers);
+			restTemplate.postForEntity(url, request, String.class, headers);
+		});
+		assertThat(exception.getMessage(), containsString(Integer.toString(HttpStatus.NOT_IMPLEMENTED.value())));
+	}
+
+	@Test
+	public void badEndPointTest() {
+		url = "http://localhost:" + randomServerPort + "/decode/something";
+		json = "{\"url\": \"value\"}";
+		Exception exception = assertThrows(RestClientException.class, () -> {
+			final HttpEntity<String> request = new HttpEntity<String>(json, headers);
+			restTemplate.postForEntity(url, request, String.class, headers);
+		});
+		assertThat(exception.getMessage(), containsString(Integer.toString(HttpStatus.METHOD_NOT_ALLOWED.value())));
+	}
+
+	@Test
+	public void malformedShortUrlTest() {
+		json = "{\"url\": \"badurl\"}";
+		url = "http://localhost:" + randomServerPort + "/decode";
+		Exception exception = assertThrows(RestClientException.class, () -> {
+			final HttpEntity<String> request = new HttpEntity<String>(json, headers);
+			restTemplate.postForEntity(url, request, String.class, headers);
+		});
+		assertThat(exception.getMessage(), containsString(Integer.toString(HttpStatus.NOT_FOUND.value())));
 	}
 
 }
