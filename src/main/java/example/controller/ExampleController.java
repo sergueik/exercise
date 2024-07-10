@@ -32,7 +32,6 @@ public class ExampleController {
 
 	private boolean debug = false;
 
-	// @Autowired
 	private ExampleService service;
 
 	@Autowired
