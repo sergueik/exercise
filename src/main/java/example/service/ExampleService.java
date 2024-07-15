@@ -1,16 +1,15 @@
 package example.service;
 
+import java.io.UnsupportedEncodingException;
 import java.security.MessageDigest;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.apache.commons.codec.binary.Base64;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
+
+import io.seruco.encoding.base62.Base62;
 
 @Service
 public class ExampleService {
@@ -20,10 +19,10 @@ public class ExampleService {
 	private final Map<String, String> fullUrlCache = new HashMap<>();
 	private final Map<String, String> shortUrlCache = new HashMap<>();
 	private MessageDigest messageDigest;
-	private Base64 base64;
+	private Base62 standardEncoder;
 
 	public ExampleService() {
-		base64 = new Base64();
+		standardEncoder = Base62.createInstance();
 		try {
 			messageDigest = MessageDigest.getInstance("SHA-256");
 		} catch (Exception e) {
@@ -38,16 +37,19 @@ public class ExampleService {
 			logger.info("using fullUrlCache for {}", name);
 			value = fullUrlCache.get(name);
 		} else {
-			messageDigest.update(name.getBytes());
+			try {
+				messageDigest.update(name.getBytes("UTF-8"));
+			} catch (UnsupportedEncodingException e) {
+
+				return null;
+			}
 			String hash = new String(messageDigest.digest());
 
 			do {
-				// NOTE: some short urls e.g. the "JD+mPIWm" is likely *not* a
-				// valid URL. Need to URL
-				// how to encode ?
-				// https://commons.apache.org/proper/commons-codec/apidocs/org/apache/commons/codec/binary/Base64.html
+				// NOTE: some base64 short urls e.g. the "JD+mPIWm" is likely
+				// *not* URI clean.
 				// https://en.wikipedia.org/wiki/Base62
-				value = new String(base64.encodeBase64(hash.getBytes())).substring(0, 8);
+				value = new String(standardEncoder.encode(hash.getBytes())).substring(0, 8);
 			} while (shortUrlCache.containsKey(value));
 			fullUrlCache.put(name, value);
 			shortUrlCache.put(value, name);

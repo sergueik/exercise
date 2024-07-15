@@ -1,4 +1,4 @@
-package example.controller;
+	package example.controller;
 
 // import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.CoreMatchers.containsString;
@@ -43,7 +43,7 @@ public class AcceptancePostTest {
 	private final Gson gson = new Gson();
 	// NOTE: exercising property file override
 	// NOTE: will not resolve shorthost when initialized here
-	// private String body = String.format("{\"result\":\"%s/JD+mPIWm\"}",
+	// private String body = String.format("{\"result\":\"%s/8avk3Ax0\"}",
 	// shorthost);
 	private final RestTemplate restTemplate = new RestTemplate();
 	private String url = null;
@@ -76,14 +76,14 @@ public class AcceptancePostTest {
 
 		final ResponseEntity<String> responseEntity = restTemplate.postForEntity(url, request, String.class, headers);
 		assertThat(responseEntity.getStatusCode(), is(HttpStatus.OK));
-		final String body = String.format("{\"result\":\"%s/JD+mPIWm\"}", shorthost);
+		final String body = String.format("{\"result\":\"%s/8avk3Ax0\"}", shorthost);
 		assertThat(responseEntity.getBody(), containsString(body));
 	}
 
 	@Test
 	public void decodeTest() {
 		final String key = "xxxx";
-		final String value = shorthost + "/" + "JD+mPIWm";
+		final String value = shorthost + "/" + "8avk3Ax0";
 		data.clear();
 		data.put("url", key);
 

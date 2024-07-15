@@ -42,9 +42,9 @@ public class ServiceTest {
 	}
 
 	public static Object[][] testData() {
-		return new Object[][] { { "xxxx", "JD+mPIWm" }, { "https://www.google.com/", "0OGWoMJd" },
+		return new Object[][] { { "xxxx", "8avk3Ax0" }, { "https://www.google.com/", "nWzeJanK" },
 				// TODO: handle blank hostnames better ?
-				{ "", "47DEQpj8" }, };
+				{ "", "rzWtdMwJ" }, };
 	}
 
 }

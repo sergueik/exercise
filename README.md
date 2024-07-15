@@ -19,14 +19,19 @@ Both endpoints need JSON payload of the following structure:
 and produce JSON of the following structure:
 ```JSON
 {
-  "result":"http://short/0OGWoMJd"
+  "result":"http://short/nWzeJanK"
 }
 ```
-the short URL `0OGWoMJd` is a result of applying
+the short URL `nWzeJanK` is a result of applying
  + `MessageDigest.getInstance("SHA-256").update()`
- + `Base64.encodeBase64`
+ + `Base62.createInstance().encode()`
  + `String.substring(1,8)` 
-to the original url `https://www.google.com/` and the hostname in the short URL `http://short` is configurable property
+to the original url `https://www.google.com/` 
+
+The [Base62 Encoder](https://github.com/seruco/base62) produces URI-compatible string.
+
+
+The hostname in the short URL `http://short` is configurable property
 defined in `application.properties`:
 ```java
 example.host = http://short
@@ -64,7 +69,7 @@ curl -s -X POST -H 'Content-Type: application/json' -d '{ "url": "https://www.go
 it will respond with
 ```JSON
 {
-  "result":"http://short/0OGWoMJd"
+  "result":"http://short/nWzeJanK"
 }
 ```
 or equivalent Postman command
@@ -78,7 +83,7 @@ or equivalent Postman command
 use the command
 
 ```sh
-curl -s -X POST -H 'Content-Type: application/json' -d '{ "url": "http://short/0OGWoMJd"}' http://localhost:8085/decode
+curl -s -X POST -H 'Content-Type: application/json' -d '{ "url": "http://short/nWzeJanK"}' http://localhost:8085/decode
 ```
 
 this will respond with
@@ -100,11 +105,18 @@ when there is a problem with parsing the payload JSON or the URL in the JSON, se
 
 ### Notes
 
-* No actual redirect is implemented, just API to encode a long string to a short string and vise versa.
+  * No actual redirect is implemented, just API to encode a long string to a short string and vise versa.
+  * To produce the short URL, the hashing and base62 encoding are applied. The same long URL will always be encoded in the same short url. Adding optional random suffix is a work in progress
+  * Adding the Swagger annotation is a work in progress (implemented in sibling project)
 
-* To produce the short URL, the hashing and base64 encoding are applied. 
-The same long URL will always be encoded in the same short url. Adding optional random suffix is a work in progress
-Adding the Swagger annotation is a work in progress 
+### See Also
+
+
+  * [encode URL With curl](https://www.baeldung.com/linux/uri-encode-curl)
+  * [Base62 Encoder/Decoder for Java](https://github.com/seruco/base62)	
+  * [wikipedia](https://en.wikipedia.org/wiki/Base62).
+
+
 
 ### Author
 [Serguei Kouzmine](kouzmine_serguei@yahoo.com)
