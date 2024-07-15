@@ -32,28 +32,35 @@ public class ExampleService {
 
 	public String encode(final String name) {
 		String value = null;
+		try {
 
-		if (fullUrlCache.containsKey(name)) {
-			logger.info("using fullUrlCache for {}", name);
-			value = fullUrlCache.get(name);
-		} else {
-			try {
+			if (fullUrlCache.containsKey(name)) {
+				logger.info("using fullUrlCache for {}", name);
+				value = fullUrlCache.get(name);
+			} else {
+				// https://www.baeldung.com/string/get-bytes
 				messageDigest.update(name.getBytes("UTF-8"));
-			} catch (UnsupportedEncodingException e) {
+				final byte[] digest = messageDigest.digest();
 
-				return null;
+				do {
+					// NOTE: Base64 produces
+					// an URI-unfrienly data e.g. the "JD+mPIWm" or ""
+					// need base62 to encode
+					// https://commons.apache.org/proper/commons-codec/apidocs/org/apache/commons/codec/binary/Base64.html
+					// https://en.wikipedia.org/wiki/Base62
+					value = new String(standardEncoder.encode(digest), "UTF-8").substring(0, 8);
+					logger.info("shortname for {}, {}", name, value);
+					if (shortUrlCache.containsKey(value)) {
+						logger.info("shortname {} is alresdy int the cache!", value);
+					}
+				} while (shortUrlCache.containsKey(value));
+				fullUrlCache.put(name, value);
+				shortUrlCache.put(value, name);
+				logger.info("saving caches for {}, {}", name, value);
 			}
-			String hash = new String(messageDigest.digest());
-
-			do {
-				// NOTE: some base64 short urls e.g. the "JD+mPIWm" is likely
-				// *not* URI clean.
-				// https://en.wikipedia.org/wiki/Base62
-				value = new String(standardEncoder.encode(hash.getBytes())).substring(0, 8);
-			} while (shortUrlCache.containsKey(value));
-			fullUrlCache.put(name, value);
-			shortUrlCache.put(value, name);
-			logger.info("saving caches for {}, {}", name, value);
+		} catch (UnsupportedEncodingException e) {
+			logger.error("Bad encoding in {}", name);
+			return null;
 		}
 		return value;
 	}
@@ -70,3 +77,4 @@ public class ExampleService {
 		return name;
 	}
 }
+

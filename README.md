@@ -23,10 +23,13 @@ and produce JSON of the following structure:
 }
 ```
 the short URL `nWzeJanK` is a result of applying
- + `MessageDigest.getInstance("SHA-256").update()`
- + `Base62.createInstance().encode()`
- + `String.substring(1,8)` 
+
+ * `MessageDigest.getInstance("SHA-256").update()`
+ * `Base62.createInstance().encode()`
+ * `new String(byte[], "UTF-8").substring(1,8)` 
+
 to the original url `https://www.google.com/` 
+
 
 The [Base62 Encoder](https://github.com/seruco/base62) produces URI-compatible string.
 
